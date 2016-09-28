@@ -27,6 +27,7 @@ enum state {
     TOP,
     DONE,
     ARRAY,
+    EAT_COMMAS,
 };
 
 static
@@ -106,7 +107,7 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 }
 
                 array_elements.push_back(element);
-                child_start = it + 1;
+                state_stack.push(state::EAT_COMMAS);
             }
 
             if (array_opens == 0) {
@@ -127,6 +128,18 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 out = std::make_shared<tree_array>(array_elements);
                 state_stack.push(state::DONE);
             }
+            break;
+
+        case state::EAT_COMMAS:
+            child_start = it;
+            /* This is funky, but essentially here we want to go ahead and
+             * re-parse the closing brace.  Since we know EAT_COMMAS can't
+             * enter an opening brace there's no reason to bother doing
+             * anything like counting the opening braces. */
+            if (token == "]" || token == "}")
+                it--;
+            if (token != ",")
+                state_stack.pop();
             break;
         }
     }
