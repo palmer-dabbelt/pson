@@ -32,37 +32,35 @@ namespace pson {
         virtual const std::vector<std::shared_ptr<tree>>& children(void) const = 0;
     };
 
+    /* Some tree nodes don't have children, here's a helper to automate that. */
+    class tree_node_without_children: public tree {
+    private:
+        static const std::vector<std::shared_ptr<tree>> _there_are_no_children;
+
+    public:
+        virtual const std::vector<std::shared_ptr<tree>>& children(void) const {
+            return _there_are_no_children;
+        }
+    };
+
     /* A tree node that contains a single element of some templated type. */
     template<typename T>
-    class tree_element: public tree {
+    class tree_element: public tree_node_without_children {
     private:
-        const std::vector<std::shared_ptr<tree>> _there_are_no_children;
         const T _value;
 
     public:
         tree_element(const T& value)
-        : _there_are_no_children(),
-          _value(value)
+        : _value(value)
         {}
 
     public:
-        virtual const std::vector<std::shared_ptr<tree>>& children(void) const { return _there_are_no_children; }
         virtual const T& value(void) const { return _value; }
     };
 
     /* Represents the special "null" JSON type, which isn't the same as NULL or
      * nullptr (C++ types). */
-    class null_element: public tree {
-    private:
-        const std::vector<std::shared_ptr<tree>> _there_are_no_children;
-
-    public:
-        null_element(void)
-        : _there_are_no_children()
-        {}
-
-    public:
-        virtual const std::vector<std::shared_ptr<tree>>& children(void) const { return _there_are_no_children; }
+    class null_element: public tree_node_without_children {
     };
 }
 
