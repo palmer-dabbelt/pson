@@ -19,10 +19,13 @@
 
 #include "lexer.h++"
 #include <fstream>
+#include <stack>
 using namespace pson;
 
 enum state {
     BODY,
+    STRING,
+    ESCAPE
 };
 
 std::vector<std::string> lexer::lex(const std::string& filename)
@@ -34,10 +37,67 @@ std::vector<std::string> lexer::lex(const std::string& filename)
     std::string token = "";
     std::vector<std::string> out;
 
+    std::stack<state> state_stack;
+    state_stack.push(state::BODY);
+
     while (file >> c) {
-        switch (c) {
-        default:
+        switch (state_stack.top()) {
+        case state::BODY:
+            switch (c) {
+            case '\\':
+                state_stack.push(state::ESCAPE);
+                break;
+
+            case '"':
+                state_stack.push(state::STRING);
+                token = token + c;
+                break;
+
+            case '[':
+            case '{':
+            case ',':
+            case ':':
+                if (token.size() > 0)
+                    out.push_back(token);
+                token = c;
+                if (token.size() > 0)
+                    out.push_back(token);
+                token = "";
+                break;
+
+            case ' ':
+            case '\t':
+            case '\n':
+                break;
+
+            default:
+                token = token + c;
+            }
+            break;
+
+        case state::STRING:
+            switch (c) {
+            case '\\':
+                state_stack.push(state::ESCAPE);
+                break;
+
+            case '"':
+                state_stack.pop();
+                token = token + c;
+                if (token.size() > 0)
+                    out.push_back(token);
+                token = "";
+                break;
+
+            default:
+                token = token + c;
+            }
+            break;
+
+        case state::ESCAPE:
             token = token + c;
+            state_stack.pop();
+            break;
         }
     }
     if (token.size() > 0)

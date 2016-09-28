@@ -36,3 +36,4 @@ DEPLIBS     += pson
 SOURCES     += pson2json.c++
 TESTSRC     += simple_string.bash
 TESTSRC     += just_null.bash
+TESTSRC     += string_with_comma.bash

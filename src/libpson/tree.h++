@@ -49,6 +49,21 @@ namespace pson {
         virtual const std::vector<std::shared_ptr<tree>>& children(void) const { return _there_are_no_children; }
         virtual const T& value(void) const { return _value; }
     };
+
+    /* Represents the special "null" JSON type, which isn't the same as NULL or
+     * nullptr (C++ types). */
+    class null_element: public tree {
+    private:
+        const std::vector<std::shared_ptr<tree>> _there_are_no_children;
+
+    public:
+        null_element(void)
+        : _there_are_no_children()
+        {}
+
+    public:
+        virtual const std::vector<std::shared_ptr<tree>>& children(void) const { return _there_are_no_children; }
+    };
 }
 
 #endif
