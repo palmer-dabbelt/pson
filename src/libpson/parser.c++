@@ -26,6 +26,7 @@ using namespace pson;
 enum state {
     TOP,
     DONE,
+    ARRAY,
 };
 
 static
@@ -48,6 +49,11 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
     std::shared_ptr<tree> out = nullptr;
 
+    std::vector<std::shared_ptr<tree>> array_elements;
+    size_t array_opens;
+
+    std::vector<std::string>::const_iterator child_start;
+
     for (auto it = start; it < stop; ++it) {
         auto token = *it;
 
@@ -60,12 +66,15 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 }
                 auto stripped = token.substr(1, token.size() - 2);
                 out = std::make_shared<tree_element<std::string>>(stripped);
-                state_stack.pop();
                 state_stack.push(state::DONE);
             } else if (token == "null") {
                 out = std::make_shared<tree_null>();
-                state_stack.pop();
                 state_stack.push(state::DONE);
+            } else if (token == "[") {
+                state_stack.push(state::ARRAY);
+                array_elements = {};
+                child_start = it + 1;
+                array_opens = 1;
             } else {
                 std::cerr << "Unparsable token " << token << "\n";
                 abort();
@@ -79,6 +88,44 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
             } else {
                 std::cerr << "Extra token after JSON file: " << token << "\n";
                 abort();
+            }
+            break;
+
+        case state::ARRAY:
+            if (token == "{" || token == "[") {
+                array_opens++;
+            } else if (token == "}" || token == "]") {
+                array_opens--;
+            }
+
+            if (array_opens == 1 && token == ",") {
+                auto element = parse(child_start, it, json_strict);
+                if (element == nullptr) {
+                    std::cerr << "Unable to parse array element\n";
+                    abort();
+                }
+
+                array_elements.push_back(element);
+                child_start = it + 1;
+            }
+
+            if (array_opens == 0) {
+                if (child_start <= it-1) {
+                    auto element = parse(child_start, it, json_strict);
+                    if (element == nullptr) {
+                        std::cerr << "Unable to parse last array element\n";
+                        abort();
+                    }
+                    array_elements.push_back(element);
+                }
+                
+                if (token != "]") {
+                    std::cerr << "Arrays must end with ]\n";
+                    abort();
+                }
+
+                out = std::make_shared<tree_array>(array_elements);
+                state_stack.push(state::DONE);
             }
             break;
         }

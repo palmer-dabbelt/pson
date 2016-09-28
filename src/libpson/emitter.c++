@@ -48,6 +48,23 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
             indent(out, depth);
             out << "null";
         },
+        some<tree_array>(), [&](auto e) {
+            indent(out, depth);
+            out << "[\n";
+
+            auto children = e.children();
+            auto it = children.begin();
+            while (it < children.end()) {
+                emit(out, depth + 1, *it);
+                ++it;
+                if (it < children.end())
+                    out << ",\n";
+            }
+
+            out << "\n";
+            indent(out, depth);
+            out << "]";
+        },
         none(), [&](){
             std::cerr << "Unmatched type in emit()\n";
             if (root == nullptr) {

@@ -37,3 +37,5 @@ SOURCES     += pson2json.c++
 TESTSRC     += simple_string.bash
 TESTSRC     += just_null.bash
 TESTSRC     += string_with_comma.bash
+TESTSRC     += string_array.bash
+TESTSRC     += string_array_with_comma.bash

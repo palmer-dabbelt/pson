@@ -62,6 +62,20 @@ namespace pson {
      * nullptr (C++ types). */
     class tree_null: public tree_node_without_children {
     };
+
+    /* Represents a JSON array, which has a bunch of children. */
+    class tree_array: public tree {
+    private:
+        const std::vector<std::shared_ptr<tree>> _children;
+
+    public:
+        tree_array(const decltype(_children)& children)
+        : _children(children)
+        {}
+
+    public:
+        virtual const decltype(_children)& children(void) const { return _children; }
+    };
 }
 
 #endif
