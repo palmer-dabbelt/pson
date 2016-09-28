@@ -60,7 +60,7 @@ namespace pson {
 
     /* Represents the special "null" JSON type, which isn't the same as NULL or
      * nullptr (C++ types). */
-    class null_element: public tree_node_without_children {
+    class tree_null: public tree_node_without_children {
     };
 }
 

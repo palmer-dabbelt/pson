@@ -44,7 +44,7 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
             indent(out, depth);
             out << "\"" << e.value() << "\"";
         },
-        some<null_element>(), [&](auto e __attribute__((unused))) {
+        some<tree_null>(), [&](auto e __attribute__((unused))) {
             indent(out, depth);
             out << "null";
         },

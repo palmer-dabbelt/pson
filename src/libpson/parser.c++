@@ -63,7 +63,7 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 state_stack.pop();
                 state_stack.push(state::DONE);
             } else if (token == "null") {
-                out = std::make_shared<null_element>();
+                out = std::make_shared<tree_null>();
                 state_stack.pop();
                 state_stack.push(state::DONE);
             } else {
