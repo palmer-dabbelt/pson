@@ -1,0 +1,37 @@
+LANGUAGES   += c++
+COMPILEOPTS += -std=c++14
+COMPILEOPTS += -Wall
+COMPILEOPTS += -Wextra
+COMPILEOPTS += -Wno-unused-private-field
+COMPILEOPTS += -Wno-unused-parameter
+COMPILEOPTS += -Werror
+
+LANGUAGES   += h
+
+LANGUAGES   += bash
+
+LANGUAGES   += c++
+COMPILEOPTS += -Isrc
+
+HEADERS     += libpson/emitter.h++
+SOURCES     += libpson/emitter.h++
+HEADERS     += libpson/parser.h++
+SOURCES     += libpson/parser.h++
+HEADERS     += libpson/tree.h++
+SOURCES     += libpson/tree.h++
+HEADERS     += libpson/lexer.h++
+SOURCES     += libpson/lexer.h++
+
+LIBRARIES   += libpson.so
+SOURCES     += libpson/parser.c++
+SOURCES     += libpson/emitter.c++
+
+# This is useful for scripts: it's really hard to emit JSON because it doesn't
+# allow trailing commas anywhere.  PSON allows trailing commas, and this
+# utility converts between PSON and JSON.
+BINARIES    += pson2json
+COMPILEOPTS += `ppkg-config tclap --cflags`
+LINKOPTS    += `ppkg-config tclap --libs`
+DEPLIBS     += pson
+SOURCES     += pson2json.c++
+TESTSRC     += simple_string.bash
