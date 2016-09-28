@@ -1,7 +1,7 @@
 #include "_tempdir.bash"
 
 cat >$INPUT <<"EOF"
-"simple string"
+null
 EOF
 
 cp $INPUT $OUTPUT.gold

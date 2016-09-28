@@ -35,3 +35,4 @@ LINKOPTS    += `ppkg-config tclap --libs`
 DEPLIBS     += pson
 SOURCES     += pson2json.c++
 TESTSRC     += simple_string.bash
+TESTSRC     += just_null.bash
