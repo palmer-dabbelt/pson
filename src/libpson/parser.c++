@@ -55,7 +55,7 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
     std::shared_ptr<tree> out = nullptr;
 
-    size_t child_opens;
+    size_t child_opens = 0;
     std::vector<std::string>::const_iterator child_start;
     std::vector<std::shared_ptr<tree>> child_elements;
     std::vector<std::shared_ptr<tree_pair_t>> child_pairs;
