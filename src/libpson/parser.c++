@@ -108,13 +108,15 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 child_opens++;
             if (token == "}" || token == "]")
                 child_opens--;
-            }
 
             if (child_opens == 1 && token == ",") {
                 auto element = parse(child_start, it, json_strict);
                 if (element == nullptr) {
-                    std::cerr << "Unable to parse array element\n";
-                    abort();
+                    std::cerr << "Unable to parse array element, array is:\n";
+                    for (auto itt = start; itt < stop; ++itt)
+                        std::cerr << "  token: " << *itt << "\n";
+                    std::cerr << std::endl;
+                    return nullptr;
                 }
 
                 child_elements.push_back(element);
@@ -224,8 +226,10 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
     }
 
     if (out == nullptr) {
-        std::cerr << "Unable to parse" << std::endl;
-        abort();
+        std::cerr << "Unable to parse tokens:" << std::endl;
+        for (auto it = start; it < stop; ++it)
+            std::cerr << "  token: " << *it << "\n";
+        std::cerr << std::endl;
     }
     return out;
 }
