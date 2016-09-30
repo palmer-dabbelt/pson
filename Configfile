@@ -42,3 +42,5 @@ TESTSRC     += string_array_with_commas.bash
 TESTSRC     += object.bash
 TESTSRC     += object_with_commas.bash
 TESTSRC     += array_of_objects.bash
+TESTSRC     += array_of_objects_with_commas.bash
+TESTSRC     += object_of_arrays.bash

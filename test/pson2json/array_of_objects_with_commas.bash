@@ -3,13 +3,13 @@
 cat >$INPUT <<"EOF"
 [
   {
-    "type": "string",
-    "data": "something"
+    "type": "string",,,
+    "data": "something",,
   },
   {
-    "other type": "another string",
-    "data": "something else"
-  }
+    "other type": "another string",,
+    "data": "something else",,,
+  },,,
 ]
 EOF
 
