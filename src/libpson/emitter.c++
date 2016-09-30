@@ -47,7 +47,6 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
             out << "null";
         },
         some<tree_array>(), [&](auto e) {
-            indent(out, depth);
             out << "[\n";
 
             auto it = begin(e);
@@ -65,7 +64,6 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
             out << "]";
         },
         some<tree_object>(), [&](auto e) {
-            indent(out, depth);
             out << "{\n";
 
             auto it = begin(e);
