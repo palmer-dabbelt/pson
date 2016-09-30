@@ -54,7 +54,9 @@ std::vector<std::string> lexer::lex(const std::string& filename)
                 break;
 
             case '[':
+            case ']':
             case '{':
+            case '}':
             case ',':
             case ':':
                 if (token.size() > 0)
