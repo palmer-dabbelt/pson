@@ -41,23 +41,22 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
 {
     match (root,
         some<tree_element<std::string>>(), [&](auto e) {
-            indent(out, depth);
             out << "\"" << e.value() << "\"";
         },
         some<tree_null>(), [&](auto e __attribute__((unused))) {
-            indent(out, depth);
             out << "null";
         },
         some<tree_array>(), [&](auto e) {
             indent(out, depth);
             out << "[\n";
 
-            auto children = e.children();
-            auto it = children.begin();
-            while (it < children.end()) {
+            auto it = begin(e);
+            auto e_end = end(e);
+            while (it < e_end) {
+                indent(out, depth + 1);
                 emit(out, depth + 1, *it);
                 ++it;
-                if (it < children.end())
+                if (it < e_end)
                     out << ",\n";
             }
 
@@ -65,10 +64,32 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
             indent(out, depth);
             out << "]";
         },
+        some<tree_object>(), [&](auto e) {
+            indent(out, depth);
+            out << "{\n";
+
+            auto it = begin(e);
+            auto e_end = end(e);
+            while (it < e_end) {
+                indent(out, depth + 1);
+                emit(out, depth + 1, (*it)->key());
+                out << ": ";
+                emit(out, depth + 1, (*it)->value());
+                ++it;
+                if (it < e_end)
+                    out << ",\n";
+            }
+
+            out << "\n";
+            indent(out, depth);
+            out << "}";
+        },
         none(), [&](){
-            std::cerr << "Unmatched type in emit()\n";
+            std::cerr << "Unmatched type in emit()" << std::endl;
             if (root == nullptr) {
-                std::cerr << "  Cannot emit nullptr\n";
+                std::cerr << "  Cannot emit nullptr" << std::endl;
+            } else {
+                std::cerr << "  root->debug(): " << root->debug() << std::endl;
             }
             std::cerr << std::endl;
             abort();

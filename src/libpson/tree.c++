@@ -19,6 +19,3 @@
 
 #include "tree.h++"
 using namespace pson;
-
-const std::vector<std::shared_ptr<tree>>
-pson::tree_node_without_children::_there_are_no_children = {};

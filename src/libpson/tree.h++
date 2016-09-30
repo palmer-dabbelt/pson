@@ -28,24 +28,13 @@ namespace pson {
      * sorts of these trees. */
     class tree {
     public:
-        /* A non-recursive traversal function. */
-        virtual const std::vector<std::shared_ptr<tree>>& children(void) const = 0;
-    };
-
-    /* Some tree nodes don't have children, here's a helper to automate that. */
-    class tree_node_without_children: public tree {
-    private:
-        static const std::vector<std::shared_ptr<tree>> _there_are_no_children;
-
-    public:
-        virtual const std::vector<std::shared_ptr<tree>>& children(void) const {
-            return _there_are_no_children;
-        }
+        /* Provides some internal debugging information about a tree instance. */
+        virtual const std::string debug(void) const = 0;
     };
 
     /* A tree node that contains a single element of some templated type. */
     template<typename T>
-    class tree_element: public tree_node_without_children {
+    class tree_element: public tree {
     private:
         const T _value;
 
@@ -56,11 +45,13 @@ namespace pson {
 
     public:
         virtual const T& value(void) const { return _value; }
+        virtual const std::string debug(void) const { return "tree_element"; }
     };
 
     /* Represents the special "null" JSON type, which isn't the same as NULL or
      * nullptr (C++ types). */
-    class tree_null: public tree_node_without_children {
+    class tree_null: public tree {
+        virtual const std::string debug(void) const { return "tree_null"; }
     };
 
     /* Represents a JSON array, which has a bunch of children. */
@@ -74,8 +65,77 @@ namespace pson {
         {}
 
     public:
-        virtual const decltype(_children)& children(void) const { return _children; }
+        const std::vector<std::shared_ptr<tree>>& children(void) const { return _children; }
+        virtual const std::string debug(void) const { return "tree_array"; }
     };
+    static inline
+    auto begin(const tree_array& a) -> decltype(begin(a.children()))
+    { return begin(a.children()); }
+    static inline
+    auto end(const tree_array& a) -> decltype(end(a.children()))
+    { return end(a.children()); }
+
+    /* Objects are an ordered set of key/value pairs. */
+    class tree_pair_t: public tree {
+    public:
+        virtual const std::shared_ptr<tree>& key(void) const = 0;
+        virtual const std::shared_ptr<tree>& value(void) const = 0;
+        virtual const std::string debug(void) const { return "tree_pair_t"; }
+    };
+
+    template <typename K, typename V>
+    class tree_pair: public tree_pair_t {
+    private:
+        const K _key;
+        const V _value;
+
+    public:
+        tree_pair(const K& key, const V& value)
+        : _key(key),
+          _value(value)
+        {}
+
+    public:
+        virtual const std::shared_ptr<tree>& key(void) const { return _key; }
+        virtual const std::shared_ptr<tree>& value(void) const { return _value; }
+        virtual const std::string debug(void) const
+        { return std::string("tree_pair<") + typeid(K).name() + ", " + typeid(V).name() + ">"; }
+    };
+    template <typename K, typename V>
+    std::shared_ptr<tree_pair<K, V>> make_tree_pair(const K& key, const V& value)
+    { return std::make_shared<tree_pair<K, V>>(key, value); }
+
+    /* Represents a JSON object, which are just a bunch of pairs. */
+    class tree_object: public tree {
+    private:
+        template <typename T>
+        static std::vector<std::shared_ptr<tree_pair_t>> vcast(const std::vector<T>& children)
+        {
+            auto out = std::vector<std::shared_ptr<tree_pair_t>>();
+            for (const auto& c: children)
+                out.push_back(c);
+            return out;
+        }
+
+    private:
+        const std::vector<std::shared_ptr<tree_pair_t>> _children;
+
+    public:
+        template<typename T>
+        tree_object(const std::vector<T>& children)
+        : _children(vcast(children))
+        {}
+
+    public:
+        const decltype(_children)& children(void) const { return _children; }
+        virtual const std::string debug(void) const { return "tree_object"; }
+    };
+    static inline
+    auto begin(const tree_object& a) -> decltype(begin(a.children()))
+    { return begin(a.children()); }
+    static inline
+    auto end(const tree_object& a) -> decltype(end(a.children()))
+    { return end(a.children()); }
 }
 
 #endif

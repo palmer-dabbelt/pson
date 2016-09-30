@@ -20,6 +20,7 @@
 #include "parser.h++"
 #include "lexer.h++"
 #include <iostream>
+#include <map>
 #include <stack>
 using namespace pson;
 
@@ -28,12 +29,16 @@ enum state {
     DONE,
     ARRAY,
     EAT_COMMAS,
+    OBJECT_KEY,
+    OBJECT_VALUE,
 };
 
 static
 std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start,
                             const std::vector<std::string>::const_iterator stop,
                             bool json_strict);
+
+static std::string to_string(const enum state& s);
 
 std::shared_ptr<tree> pson::parse_pson(const std::string& filename)
 {
@@ -50,10 +55,11 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
     std::shared_ptr<tree> out = nullptr;
 
-    std::vector<std::shared_ptr<tree>> array_elements;
-    size_t array_opens;
-
+    size_t child_opens;
     std::vector<std::string>::const_iterator child_start;
+    std::vector<std::shared_ptr<tree>> child_elements;
+    std::vector<std::shared_ptr<tree_pair_t>> child_pairs;
+    std::shared_ptr<tree> child_key;
 
     for (auto it = start; it < stop; ++it) {
         auto token = *it;
@@ -73,9 +79,14 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 state_stack.push(state::DONE);
             } else if (token == "[") {
                 state_stack.push(state::ARRAY);
-                array_elements = {};
+                child_elements = {};
                 child_start = it + 1;
-                array_opens = 1;
+                child_opens = 1;
+            } else if (token == "{") {
+                state_stack.push(state::OBJECT_KEY);
+                child_pairs = {};
+                child_start = it + 1;
+                child_opens = 1;
             } else {
                 std::cerr << "Unparsable token " << token << "\n";
                 abort();
@@ -94,30 +105,30 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
         case state::ARRAY:
             if (token == "{" || token == "[") {
-                array_opens++;
+                child_opens++;
             } else if (token == "}" || token == "]") {
-                array_opens--;
+                child_opens--;
             }
 
-            if (array_opens == 1 && token == ",") {
+            if (child_opens == 1 && token == ",") {
                 auto element = parse(child_start, it, json_strict);
                 if (element == nullptr) {
                     std::cerr << "Unable to parse array element\n";
                     abort();
                 }
 
-                array_elements.push_back(element);
+                child_elements.push_back(element);
                 state_stack.push(state::EAT_COMMAS);
             }
 
-            if (array_opens == 0) {
+            if (child_opens == 0) {
                 if (child_start <= it-1) {
                     auto element = parse(child_start, it, json_strict);
                     if (element == nullptr) {
                         std::cerr << "Unable to parse last array element\n";
                         abort();
                     }
-                    array_elements.push_back(element);
+                    child_elements.push_back(element);
                 }
                 
                 if (token != "]") {
@@ -125,7 +136,7 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                     abort();
                 }
 
-                out = std::make_shared<tree_array>(array_elements);
+                out = std::make_shared<tree_array>(child_elements);
                 state_stack.push(state::DONE);
             }
             break;
@@ -141,8 +152,95 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
             if (token != ",")
                 state_stack.pop();
             break;
+
+        case state::OBJECT_KEY:
+            if (token == "{" || token == "[")
+                child_opens++;
+            if (token == "}" || token == "]")
+                child_opens--;
+
+            if (child_opens == 1 && token == ":") {
+                child_key = parse(child_start, it, json_strict);
+                if (child_key == nullptr) {
+                    std::cerr << "Unable to parse object key\n";
+                    abort();
+                }
+                child_start = it + 1;
+
+                state_stack.push(state::OBJECT_VALUE);
+            }
+
+            if (child_opens == 0) {
+                out = std::make_shared<tree_object>(child_pairs);
+                state_stack.push(state::DONE);
+            }
+            break;
+
+
+        case state::OBJECT_VALUE:
+            if (token == "{" || token == "[")
+                child_opens++;
+            if (token == "}" || token == "]")
+                child_opens--;
+
+            if (child_opens == 1 && token == ",") {
+                auto child_value = parse(child_start, it, json_strict);
+                if (child_value == nullptr) {
+                    std::cerr << "Unable to parse object value\n";
+                    abort();
+                }
+                if (child_key == nullptr) {
+                    std::cerr << "Object value without key\n";
+                    abort();
+                }
+
+                child_pairs.push_back(make_tree_pair(child_key, child_value));
+                child_key = nullptr;
+                state_stack.pop();
+                state_stack.push(state::EAT_COMMAS);
+            }
+
+            if (child_opens == 0) {
+                auto child_value = parse(child_start, it, json_strict);
+                if (child_value == nullptr) {
+                    std::cerr << "Unable to parse object value\n";
+                    abort();
+                }
+                if (child_key == nullptr) {
+                    std::cerr << "Object value without key\n";
+                    abort();
+                }
+
+                child_pairs.push_back(make_tree_pair(child_key, child_value));
+                child_key = nullptr;
+                state_stack.pop();
+                state_stack.push(state::EAT_COMMAS);
+
+                out = std::make_shared<tree_object>(child_pairs);
+                state_stack.push(state::DONE);
+            }
+            break;
         }
     }
 
+    if (out == nullptr) {
+        std::cerr << "Unable to parse" << std::endl;
+        abort();
+    }
     return out;
+}
+
+std::string to_string(const enum state& s)
+{
+    switch (s) {
+    case state::TOP: return "TOP";
+    case state::DONE: return "DONE";
+    case state::ARRAY: return "ARRAY";
+    case state::EAT_COMMAS: return "EAT_COMMAS";
+    case state::OBJECT_KEY: return "OBJECT_KEY";
+    case state::OBJECT_VALUE: return "OBJECT_VALUE";
+    }
+
+    abort();
+    return "";
 }
