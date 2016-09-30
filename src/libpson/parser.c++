@@ -146,9 +146,11 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
         case state::EAT_COMMAS:
             child_start = it;
             /* This is funky, but essentially here we want to go ahead and
-             * re-parse the closing brace.  Since we know EAT_COMMAS can't
+             * re-parse any braces.  Since we know EAT_COMMAS can't
              * enter an opening brace there's no reason to bother doing
              * anything like counting the opening braces. */
+            if (token == "{" || token == "[")
+                it--;
             if (token == "]" || token == "}")
                 it--;
             if (token != ",")
