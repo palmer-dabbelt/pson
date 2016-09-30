@@ -104,9 +104,9 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
             break;
 
         case state::ARRAY:
-            if (token == "{" || token == "[") {
+            if (token == "{" || token == "[")
                 child_opens++;
-            } else if (token == "}" || token == "]") {
+            if (token == "}" || token == "]")
                 child_opens--;
             }
 
