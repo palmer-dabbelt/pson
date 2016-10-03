@@ -181,9 +181,10 @@ namespace pson {
             if (got == nullptr)
                 return out;
 
-            auto got_cast = std::dynamic_pointer_cast<tree_array>(got);
+            auto got_cast = std::dynamic_pointer_cast<tree_array>(got->value());
             if (got_cast == nullptr) {
                 std::cerr << "found key, but not an array\n";
+                std::cerr << "  looking for a std::shared_ptr<tree_array>, got a " << typeid(got).name() << "\n";
                 abort();
             }
 
