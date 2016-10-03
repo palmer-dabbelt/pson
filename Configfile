@@ -15,6 +15,8 @@ COMPILEOPTS += -Isrc
 
 GENERATE    += version.h
 
+# The whole point of this package is to produce a C++ JSON parsing library.
+# Here it is!
 HEADERS     += libpson/emitter.h++
 SOURCES     += libpson/emitter.h++
 HEADERS     += libpson/parser.h++
