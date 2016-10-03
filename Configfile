@@ -21,21 +21,21 @@ GENERATE    += version-pc.sed
 
 # The whole point of this package is to produce a C++ JSON parsing library.
 # Here it is!
-HEADERS     += libpson/emitter.h++
-SOURCES     += libpson/emitter.h++
-HEADERS     += libpson/parser.h++
-SOURCES     += libpson/parser.h++
-HEADERS     += libpson/tree.h++
-SOURCES     += libpson/tree.h++
-HEADERS     += libpson/lexer.h++
-SOURCES     += libpson/lexer.h++
+HEADERS     += pson/emitter.h++
+SOURCES     += pson/emitter.h++
+HEADERS     += pson/parser.h++
+SOURCES     += pson/parser.h++
+HEADERS     += pson/tree.h++
+SOURCES     += pson/tree.h++
+HEADERS     += pson/lexer.h++
+SOURCES     += pson/lexer.h++
 
 LIBRARIES   += libpson.so
-SOURCES     += libpson/parser.c++
-SOURCES     += libpson/emitter.c++
+SOURCES     += pson/parser.c++
+SOURCES     += pson/emitter.c++
 
 LIBRARIES   += pkgconfig/pson.pc
-SOURCES     += libpson/pson.pc
+SOURCES     += pson/pson.pc
 
 # This is useful for scripts: it's really hard to emit JSON because it doesn't
 # allow trailing commas anywhere.  PSON allows trailing commas, and this
