@@ -20,6 +20,7 @@
 #ifndef LIBPSON__TREE_HXX
 #define LIBPSON__TREE_HXX
 
+#include "option.h++"
 #include <memory>
 #include <vector>
 
@@ -129,6 +130,36 @@ namespace pson {
     public:
         const decltype(_children)& children(void) const { return _children; }
         virtual const std::string debug(void) const { return "tree_object"; }
+
+    public:
+        /* Frequently users are just expecting a string key and a simple value.
+         * This function lets them get it, and in a type-safe manner! */
+        template<typename T> option<T> get(const std::string& key_value) {
+            for (const auto& child: _children) {
+                auto key = child->key();
+
+                /* We're only looking for simple strings. */
+                auto cast_key = std::dynamic_pointer_cast<tree_element<std::string>>(key);
+                if (cast_key == nullptr)
+                    continue;
+
+                /* Check to make sure the key matches. */
+                if (cast_key->value() != key_value)
+                    continue;
+                auto value = child->value();
+
+                /* We're also looking for a simple value. */
+                auto cast_value = std::dynamic_pointer_cast<tree_element<T>>(value);
+                if (cast_value == nullptr) {
+                    std::cerr << "found key " << value << " with the wrong type\n";
+                    abort();
+                }
+
+                return option<T>(cast_value->value());
+            }
+
+            return option<T>();
+        }
     };
     static inline
     auto begin(const tree_object& a) -> decltype(begin(a.children()))

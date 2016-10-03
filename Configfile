@@ -29,6 +29,8 @@ HEADERS     += pson/tree.h++
 SOURCES     += pson/tree.h++
 HEADERS     += pson/lexer.h++
 SOURCES     += pson/lexer.h++
+HEADERS     += pson/option.h++
+SOURCES     += pson/option.h++
 
 LIBRARIES   += libpson.so
 SOURCES     += pson/parser.c++
