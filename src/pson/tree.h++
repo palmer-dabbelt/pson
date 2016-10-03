@@ -136,6 +136,24 @@ namespace pson {
         /* Frequently users are just expecting a string key and a simple value.
          * This function lets them get it, and in a type-safe manner! */
         template<typename T> option<T> get(const std::string& key_value) {
+            auto child = get_pair(key_value);
+            if (child == nullptr)
+                return option<T>();
+
+            auto value = child->value();
+            auto cast_value = std::dynamic_pointer_cast<tree_element<T>>(value);
+            if (cast_value == nullptr) {
+                std::cerr << "found key " << value << " with the wrong type\n";
+                std::cerr << "  key has type " << typeid(value).name() << "\n";
+                std::cerr << "  looking for type " << typeid(tree_element<T>).name() << "\n";
+                abort();
+            }
+
+            return option<T>(cast_value->value());
+        }
+
+        /* This is a less type-safe version of the getter method. */
+        std::shared_ptr<tree_pair_t> get_pair(const std::string& key_value) {
             for (const auto& child: _children) {
                 auto key = child->key();
 
@@ -147,32 +165,23 @@ namespace pson {
                 /* Check to make sure the key matches. */
                 if (cast_key->value() != key_value)
                     continue;
-                auto value = child->value();
-
-                /* We're also looking for a simple value. */
-                auto cast_value = std::dynamic_pointer_cast<tree_element<T>>(value);
-                if (cast_value == nullptr) {
-                    std::cerr << "found key " << value << " with the wrong type\n";
-                    abort();
-                }
-
-                return option<T>(cast_value->value());
+                return child;
             }
 
-            return option<T>();
+            return nullptr;
         }
 
         /* Another common operation is to match a simple string as a key to an
          * array, and then map a function over all those array elements. */
         template<typename ret_t, typename arg_t>
         std::vector<ret_t> map(const std::string& key_value, std::function<ret_t(std::shared_ptr<arg_t>)> func) {
-            auto got = get<std::shared_ptr<arg_t>>(key_value);
-
             auto out = std::vector<ret_t>();
-            if (got.valid() == false)
+
+            auto got = get_pair(key_value);
+            if (got == nullptr)
                 return out;
 
-            auto got_cast = std::dynamic_pointer_cast<tree_array>(got.data());
+            auto got_cast = std::dynamic_pointer_cast<tree_array>(got);
             if (got_cast == nullptr) {
                 std::cerr << "found key, but not an array\n";
                 abort();
