@@ -20,6 +20,7 @@
 #include <libpson/parser.h++>
 #include <libpson/emitter.h++>
 #include <tclap/CmdLine.h>
+#include "version.h"
 
 int main(int argc, const char **argv)
 {
@@ -27,7 +28,7 @@ int main(int argc, const char **argv)
         TCLAP::CmdLine cmd(
             "Converts a PSON file to a JSON file\n",
             ' ',
-            "0");
+            PCONFIGURE_VERSION);
 
         TCLAP::ValueArg<std::string> input("i",
                                            "input",

@@ -13,6 +13,8 @@ LANGUAGES   += bash
 LANGUAGES   += c++
 COMPILEOPTS += -Isrc
 
+GENERATE    += version.h
+
 HEADERS     += libpson/emitter.h++
 SOURCES     += libpson/emitter.h++
 HEADERS     += libpson/parser.h++
