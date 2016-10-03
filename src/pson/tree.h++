@@ -21,6 +21,7 @@
 #define LIBPSON__TREE_HXX
 
 #include "option.h++"
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -159,6 +160,35 @@ namespace pson {
             }
 
             return option<T>();
+        }
+
+        /* Another common operation is to match a simple string as a key to an
+         * array, and then map a function over all those array elements. */
+        template<typename ret_t, typename arg_t>
+        std::vector<ret_t> map(const std::string& key_value, std::function<ret_t(std::shared_ptr<arg_t>)> func) {
+            auto got = get<std::shared_ptr<arg_t>>(key_value);
+
+            auto out = std::vector<ret_t>();
+            if (got.valid() == false)
+                return out;
+
+            auto got_cast = std::dynamic_pointer_cast<tree_array>(got.data());
+            if (got_cast == nullptr) {
+                std::cerr << "found key, but not an array\n";
+                abort();
+            }
+
+            for (const auto& child: got_cast->children()) {
+                auto child_cast = std::dynamic_pointer_cast<arg_t>(child);
+                if (child == nullptr) {
+                    std::cerr << "found child, but not of argument type\n";
+                    abort();
+                }
+
+                out.push_back(func(child_cast));
+            }
+
+            return out;
         }
     };
     static inline
