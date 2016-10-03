@@ -40,6 +40,12 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
 static inline std::string to_string(const enum state& s);
 
+std::shared_ptr<tree> pson::parse_json(const std::string& filename)
+{
+    auto tokens = lexer::lex(filename);
+    return parse(tokens.begin(), tokens.end(), true);
+}
+
 std::shared_ptr<tree> pson::parse_pson(const std::string& filename)
 {
     auto tokens = lexer::lex(filename);
