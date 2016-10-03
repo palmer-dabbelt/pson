@@ -10,10 +10,14 @@ LANGUAGES   += h
 
 LANGUAGES   += bash
 
+LANGUAGES   += pkgconfig
+LINKOPTS    += -Sobj/proc/version-pc.sed
+
 LANGUAGES   += c++
 COMPILEOPTS += -Isrc
 
 GENERATE    += version.h
+GENERATE    += version-pc.sed
 
 # The whole point of this package is to produce a C++ JSON parsing library.
 # Here it is!
@@ -29,6 +33,9 @@ SOURCES     += libpson/lexer.h++
 LIBRARIES   += libpson.so
 SOURCES     += libpson/parser.c++
 SOURCES     += libpson/emitter.c++
+
+LIBRARIES   += pkgconfig/pson.pc
+SOURCES     += libpson/pson.pc
 
 # This is useful for scripts: it's really hard to emit JSON because it doesn't
 # allow trailing commas anywhere.  PSON allows trailing commas, and this
