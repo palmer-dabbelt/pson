@@ -43,6 +43,9 @@ void emit(std::ofstream& out, size_t depth, const std::shared_ptr<tree>& root)
         some<tree_element<std::string>>(), [&](auto e) {
             out << "\"" << e.value() << "\"";
         },
+        some<tree_element<int>>(), [&](auto e) {
+            out << std::to_string(e.value());
+        },
         some<tree_null>(), [&](auto e __attribute__((unused))) {
             out << "null";
         },

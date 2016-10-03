@@ -40,6 +40,8 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
 
 static inline std::string to_string(const enum state& s);
 
+static inline option<int> to_int(const std::string& token);
+
 std::shared_ptr<tree> pson::parse_json(const std::string& filename)
 {
     auto tokens = lexer::lex(filename);
@@ -93,6 +95,9 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                 child_pairs = {};
                 child_start = it + 1;
                 child_opens = 1;
+            } else if (to_int(token).valid()) {
+                out = std::make_shared<tree_element<int>>(to_int(token).data());
+                state_stack.push(state::DONE);
             } else {
                 std::cerr << "Unparsable token " << token << "\n";
                 abort();
@@ -255,4 +260,13 @@ std::string to_string(const enum state& s)
 
     abort();
     return "";
+}
+
+inline option<int> to_int(const std::string& token)
+{
+    try {
+        return option<int>(std::stoi(token));
+    } catch (...) {
+        return option<int>();
+    }
 }
