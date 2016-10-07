@@ -38,7 +38,7 @@ std::shared_ptr<tree> parse(const std::vector<std::string>::const_iterator start
                             const std::vector<std::string>::const_iterator stop,
                             bool json_strict);
 
-static inline std::string to_string(const enum state& s);
+static inline std::string to_string(const enum state& s) __attribute__((unused));
 
 static inline option<int> to_int(const std::string& token);
 
