@@ -20,13 +20,16 @@
 #ifndef LIBPSON__LEXER_HXX
 #define LIBPSON__LEXER_HXX
 
+#include <istream>
 #include <string>
 #include <vector>
 
 namespace pson {
     namespace lexer {
         /* A hand-written JSON (or PSON) lexer. */
-        std::vector<std::string> lex(const std::string& filename);
+        std::vector<std::string> lex_file(const std::string& filename);
+        std::vector<std::string> lex_string(const std::string& data);
+        std::vector<std::string> lex_stream(std::istream& data);
     }
 }
 

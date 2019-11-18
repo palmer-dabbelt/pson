@@ -26,11 +26,13 @@
 
 namespace pson {
     /* A JSON parser. */
-    std::shared_ptr<tree> parse_json(const std::string& filename);
+    std::shared_ptr<tree> parse_json_file(const std::string& filename);
+    std::shared_ptr<tree> parse_json_string(const std::string& data);
 
     /* A PSON parser.  PSON is a superset of JSON: all JSON files are valid
      * PSON files, but PSON allows trailing commas anywhere. */
-    std::shared_ptr<tree> parse_pson(const std::string& filename);
+    std::shared_ptr<tree> parse_pson_string(const std::string& filename);
+    std::shared_ptr<tree> parse_pson_file(const std::string& data);
 }
 
 #endif

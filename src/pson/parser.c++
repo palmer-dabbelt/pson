@@ -42,15 +42,27 @@ static inline std::string to_string(const enum state& s) __attribute__((unused))
 
 static inline option<int> to_int(const std::string& token);
 
-std::shared_ptr<tree> pson::parse_json(const std::string& filename)
+std::shared_ptr<tree> pson::parse_json_file(const std::string& filename)
 {
-    auto tokens = lexer::lex(filename);
+    auto tokens = lexer::lex_file(filename);
     return parse(tokens.begin(), tokens.end(), true);
 }
 
-std::shared_ptr<tree> pson::parse_pson(const std::string& filename)
+std::shared_ptr<tree> pson::parse_pson_file(const std::string& filename)
 {
-    auto tokens = lexer::lex(filename);
+    auto tokens = lexer::lex_file(filename);
+    return parse(tokens.begin(), tokens.end(), false);
+}
+
+std::shared_ptr<tree> pson::parse_json_string(const std::string& filename)
+{
+    auto tokens = lexer::lex_string(filename);
+    return parse(tokens.begin(), tokens.end(), true);
+}
+
+std::shared_ptr<tree> pson::parse_pson_string(const std::string& filename)
+{
+    auto tokens = lexer::lex_string(filename);
     return parse(tokens.begin(), tokens.end(), false);
 }
 

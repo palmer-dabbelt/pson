@@ -48,7 +48,7 @@ int main(int argc, const char **argv)
 
         cmd.parse(argc, argv);
 
-        auto t = pson::parse_pson(input.getValue());
+        auto t = pson::parse_pson_file(input.getValue());
         pson::emit_json(output.getValue(), t);
         return 0;
     } catch (TCLAP::ArgException &e) {

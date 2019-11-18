@@ -19,6 +19,7 @@
 
 #include "lexer.h++"
 #include <fstream>
+#include <sstream>
 #include <stack>
 using namespace pson;
 
@@ -28,11 +29,22 @@ enum state {
     ESCAPE
 };
 
-std::vector<std::string> lexer::lex(const std::string& filename)
+std::vector<std::string> lexer::lex_file(const std::string& filename)
 {
     std::ifstream file(filename);
     file >> std::noskipws;
+    return lex_stream(file);
+}
 
+std::vector<std::string> lexer::lex_string(const std::string& data)
+{
+    std::istringstream ss(data);
+    ss >> std::noskipws;
+    return lex_stream(ss);
+}
+
+std::vector<std::string> lexer::lex_stream(std::istream& file)
+{
     char c;
     std::string token = "";
     std::vector<std::string> out;
