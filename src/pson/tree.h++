@@ -45,6 +45,8 @@ namespace pson {
         : _value(value)
         {}
 
+	virtual ~tree_element(void) {}
+
     public:
         virtual const T& value(void) const { return _value; }
         virtual const std::string debug(void) const { return "tree_element"; }
@@ -53,6 +55,10 @@ namespace pson {
     /* Represents the special "null" JSON type, which isn't the same as NULL or
      * nullptr (C++ types). */
     class tree_null: public tree {
+    public:
+        virtual ~tree_null(void) {}
+
+    private:
         virtual const std::string debug(void) const { return "tree_null"; }
     };
 
@@ -65,6 +71,8 @@ namespace pson {
         tree_array(const decltype(_children)& children)
         : _children(children)
         {}
+
+	virtual ~tree_array(void) {}
 
     public:
         const std::vector<std::shared_ptr<tree>>& children(void) const { return _children; }
@@ -97,6 +105,8 @@ namespace pson {
           _value(value)
         {}
 
+	virtual ~tree_pair(void) {}
+
     public:
         virtual const std::shared_ptr<tree>& key(void) const { return _key; }
         virtual const std::shared_ptr<tree>& value(void) const { return _value; }
@@ -127,6 +137,8 @@ namespace pson {
         tree_object(const std::vector<T>& children)
         : _children(vcast(children))
         {}
+
+	virtual ~tree_object(void) {}
 
     public:
         const decltype(_children)& children(void) const { return _children; }
